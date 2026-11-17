@@ -54,6 +54,30 @@
 
             <button type="submit">Add Income</button>
         </form>
+
+        <h2>Saved Income</h2>
+        {% if income_entries %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in income_entries %}
+                        <tr>
+                            <td>${{ "%.2f"|format(entry.amount) }}</td>
+                            <td>{{ entry.description }}</td>
+                            <td>{{ entry.date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No income entries have been added yet.</p>
+        {% endif %}
     </main>
 </body>
 </html>
