@@ -54,4 +54,5 @@ def home():
         errors=errors,
         confirmation=confirmation,
         form_values=form_values,
+        income_entries=income_entries,
     )
