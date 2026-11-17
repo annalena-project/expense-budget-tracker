@@ -2,10 +2,11 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 from flask import Flask
-from flask import abort, render_template, request
+from flask import abort, flash, redirect, render_template, request, url_for
 
 # Create the Flask application and a temporary in-memory list for income entries.
 app = Flask(__name__)
+app.secret_key = "dev-only-change-me"
 income_entries = []
 expense_entries = []
 expense_categories = [
@@ -202,3 +203,21 @@ def edit_entry(entry_type, index):
         edit_confirmation=confirmation,
         edit_form_values=form_values,
     )
+
+
+@app.route("/delete/<entry_type>/<int:index>", methods=["POST"])
+def delete_entry(entry_type, index):
+    """Delete one income or expense entry and return to the home page."""
+    if entry_type == "income":
+        entries = income_entries
+    elif entry_type == "expense":
+        entries = expense_entries
+    else:
+        abort(404)
+
+    if index < 0 or index >= len(entries):
+        abort(404)
+
+    entries.pop(index)
+    flash(f"{entry_type.title()} entry deleted successfully.")
+    return redirect(url_for("home"))
