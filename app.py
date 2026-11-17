@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 from flask import Flask
-from flask import render_template, request
+from flask import abort, render_template, request
 
 # Create the Flask application and a temporary in-memory list for income entries.
 app = Flask(__name__)
@@ -124,4 +124,81 @@ def add_expense():
         expense_form_values=form_values,
         expense_entries=expense_entries,
         expense_categories=expense_categories,
+    )
+
+
+@app.route("/edit/<entry_type>/<int:index>", methods=["GET", "POST"])
+def edit_entry(entry_type, index):
+    """Show an edit form and save valid changes to an existing entry."""
+    if entry_type == "income":
+        entries = income_entries
+    elif entry_type == "expense":
+        entries = expense_entries
+    else:
+        abort(404)
+
+    if index >= len(entries):
+        abort(404)
+
+    entry = entries[index]
+    errors = []
+    confirmation = None
+    form_values = {
+        "amount": str(entry["amount"]),
+        "description": entry["description"],
+        "date": str(entry["date"]),
+        "category": entry.get("category", ""),
+    }
+
+    if request.method == "POST":
+        form_values = {
+            "amount": request.form.get("amount", "").strip(),
+            "description": request.form.get("description", "").strip(),
+            "date": request.form.get("date", "").strip(),
+            "category": request.form.get("category", "").strip(),
+        }
+
+        try:
+            amount = Decimal(form_values["amount"])
+            if not amount.is_finite() or amount <= 0:
+                errors.append(f"Enter an {entry_type} amount greater than zero.")
+        except InvalidOperation:
+            errors.append(f"Enter a valid {entry_type} amount.")
+
+        if not form_values["description"]:
+            errors.append("Enter a description.")
+
+        try:
+            entry_date = datetime.strptime(form_values["date"], "%Y-%m-%d").date()
+        except ValueError:
+            errors.append("Enter a valid date.")
+
+        if entry_type == "expense" and form_values["category"] not in expense_categories:
+            errors.append("Choose a valid expense category.")
+
+        if not errors:
+            entry["amount"] = amount
+            entry["description"] = form_values["description"]
+            entry["date"] = entry_date
+            if entry_type == "expense":
+                entry["category"] = form_values["category"]
+            confirmation = f"{entry_type.title()} entry updated successfully."
+
+    return render_template(
+        "index.html",
+        errors=[],
+        confirmation=None,
+        form_values={"amount": "", "description": "", "date": ""},
+        income_entries=income_entries,
+        expense_errors=[],
+        expense_confirmation=None,
+        expense_form_values={"amount": "", "description": "", "date": "", "category": ""},
+        expense_entries=expense_entries,
+        expense_categories=expense_categories,
+        edit_entry=entry,
+        edit_type=entry_type,
+        edit_index=index,
+        edit_errors=errors,
+        edit_confirmation=confirmation,
+        edit_form_values=form_values,
     )
