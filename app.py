@@ -429,19 +429,46 @@ def edit_entry(entry_type, entry_id):
     )
 
 
-@app.route("/delete/<entry_type>/<int:index>", methods=["POST"])
-def delete_entry(entry_type, index):
-    """Delete one income or expense entry and return to the home page."""
+@app.route("/delete/<entry_type>/<int:entry_id>", methods=["POST"])
+def delete_entry(entry_type, entry_id):
+    """Delete one income or expense record from PostgreSQL."""
     if entry_type == "income":
-        entries = income_entries
+        delete_sql = "DELETE FROM income WHERE id = %s"
     elif entry_type == "expense":
-        entries = expense_entries
+        delete_sql = "DELETE FROM expense WHERE id = %s"
     else:
         abort(404)
 
-    if index < 0 or index >= len(entries):
-        abort(404)
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute(delete_sql, (entry_id,))
+        if cursor.rowcount == 0:
+            abort(404)
 
-    entries.pop(index)
-    flash(f"{entry_type.title()} entry deleted successfully.")
+        connection.commit()
+        flash(f"{entry_type.title()} entry deleted successfully.")
+    except psycopg.Error:
+        app.logger.exception("Database error while deleting %s entry %s.", entry_type, entry_id)
+        if connection is not None:
+            try:
+                connection.rollback()
+            except psycopg.Error:
+                app.logger.exception("Database error while rolling back delete.")
+        flash(f"Could not delete {entry_type}. Please try again.")
+    finally:
+        try:
+            if cursor is not None:
+                cursor.close()
+        except psycopg.Error:
+            app.logger.exception("Database error while closing delete cursor.")
+        finally:
+            if connection is not None:
+                try:
+                    connection.close()
+                except psycopg.Error:
+                    app.logger.exception("Database error while closing delete connection.")
+
     return redirect(url_for("home"))
