@@ -96,7 +96,24 @@ def load_entries():
                 except psycopg.Error:
                     app.logger.exception("Database error while closing records connection.")
 
-    return income_entries, income_load_error, expense_entries, expense_load_error
+    totals = None
+    if not income_load_error and not expense_load_error:
+        total_income = sum(
+            (Decimal(str(entry["amount"])) for entry in income_entries),
+            Decimal("0.00"),
+        )
+        total_expenses = sum(
+            (Decimal(str(entry["amount"])) for entry in expense_entries),
+            Decimal("0.00"),
+        )
+        balance = total_income - total_expenses
+        totals = {
+            "income": f"${total_income:,.2f}",
+            "expenses": f"${total_expenses:,.2f}",
+            "balance": f"${balance:,.2f}",
+        }
+
+    return income_entries, income_load_error, expense_entries, expense_load_error, totals
 
 
 # Show the form on GET requests and process it when it is submitted with POST.
@@ -162,7 +179,7 @@ def home():
                         except psycopg.Error:
                             app.logger.exception("Database error while closing income connection.")
 
-    income_entries, income_load_error, expense_entries, expense_load_error = load_entries()
+    income_entries, income_load_error, expense_entries, expense_load_error, totals = load_entries()
 
     return render_template(
         "index.html",
@@ -172,6 +189,7 @@ def home():
         income_entries=income_entries,
         income_load_error=income_load_error,
         expense_load_error=expense_load_error,
+        totals=totals,
         expense_errors=[],
         expense_confirmation=None,
         expense_form_values={"amount": "", "description": "", "date": "", "category": ""},
@@ -249,7 +267,7 @@ def add_expense():
                     except psycopg.Error:
                         app.logger.exception("Database error while closing expense connection.")
 
-    income_entries, income_load_error, expense_entries, expense_load_error = load_entries()
+    income_entries, income_load_error, expense_entries, expense_load_error, totals = load_entries()
 
     return render_template(
         "index.html",
@@ -263,6 +281,7 @@ def add_expense():
         expense_form_values=form_values,
         expense_entries=expense_entries,
         expense_load_error=expense_load_error,
+        totals=totals,
         expense_categories=expense_categories,
     )
 
@@ -404,7 +423,7 @@ def edit_entry(entry_type, entry_id):
                 except psycopg.Error:
                     app.logger.exception("Database error while closing edit connection.")
 
-    income_entries, income_load_error, expense_entries, expense_load_error = load_entries()
+    income_entries, income_load_error, expense_entries, expense_load_error, totals = load_entries()
 
     return render_template(
         "index.html",
@@ -418,6 +437,7 @@ def edit_entry(entry_type, entry_id):
         expense_form_values={"amount": "", "description": "", "date": "", "category": ""},
         expense_entries=expense_entries,
         expense_load_error=expense_load_error,
+        totals=totals,
         expense_categories=expense_categories,
         edit_entry=entry,
         edit_type=entry_type,
