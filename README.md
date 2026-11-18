@@ -1,183 +1,362 @@
+
 # 💰 Expense & Budget Tracker
 ### Personal Finance & Analytics Web Application
 
-**Project Status:** 🚧 Planning & Design | **Development:** Upcoming Project Units
+**Project Status:** ✅ Sprint 1 MVP Completed | **Development:** Sprint 2 Planned
 
 ---
 
 ## 📖 Project Overview
 
-Expense & Budget Tracker is a personal finance and analytics web application designed to help users manage their income, expenses, monthly budgets, and savings goals in one place.
+Expense & Budget Tracker is a personal finance web application designed to help users manage their income and expenses and understand their current financial balance.
 
-Managing personal finances can be challenging when financial information is spread across different tools or when users do not have a clear overview of their spending habits.
+The Sprint 1 MVP provides a working dashboard where users can add, edit, delete, and view financial records. The application automatically calculates total income, total expenses, and the remaining balance using data stored in PostgreSQL.
 
-This application aims to make financial planning easier by providing a simple interface for recording transactions, organizing budgets, tracking savings goals, and analyzing financial activity through charts and summaries.
+The application is built with Python, Flask, HTML, CSS, and PostgreSQL. It is containerized with Docker and deployed using Google Cloud Run and Cloud SQL.
 
-The goal is to help users better understand their financial situation and make more informed financial decisions.
+Future development will include monthly budgets, fixed and recurring expenses, savings goals, and financial analytics.
 
 ---
 
 ## 🎯 Project Objectives
 
-The main objectives of this project are to:
+The main objectives are to:
 
 - Provide a simple way to record and manage income and expenses.
-- Help users create monthly budgets and compare planned spending with actual expenses.
-- Allow users to set savings goals and monitor their progress.
-- Visualize financial information through charts and summaries.
-- Make personal financial information easier to understand and manage.
+- Store financial information in a PostgreSQL database.
+- Automatically calculate total income, total expenses, and balance.
+- Create a clear and user-friendly financial dashboard.
+- Expand the application with budgeting, recurring expenses, savings, and analytics in Sprint 2.
 
 ---
 
-## ✨ Planned Features
+## ✨ Sprint 1 MVP Features
 
-### 💵 1. Income & Expense Management
-- Add new income and expense entries.
-- Organize transactions by category and date.
-- Edit existing financial entries.
-- Delete incorrect or unwanted transactions.
-- View saved income and expense information.
+### 💵 Income & Expense Management
 
-### 📅 2. Monthly Budget Planning
-- Create monthly spending budgets.
-- Compare planned budgets with actual expenses.
-- Calculate the difference between budgeted and actual spending.
-- Identify when spending exceeds the planned budget.
+- Add income and expense entries.
+- Record amounts, descriptions, and dates.
+- Organize expenses by category.
+- Edit existing entries.
+- Delete unwanted entries.
+- View saved records in separate tables.
+- Store financial records in PostgreSQL.
 
-### 🎯 3. Savings Goals
-- Create personal savings goals with target amounts.
-- Record contributions toward savings goals.
-- Calculate total savings and progress percentages.
-- Monitor progress toward financial targets.
+### 📊 Financial Dashboard
 
-### 📊 4. Financial Analytics Dashboard
-- View expenses grouped by category.
-- Analyze monthly spending trends.
-- Compare income and expenses using charts.
-- View a financial summary of income, expenses, and savings.
+- Display total income.
+- Display total expenses.
+- Automatically calculate the remaining balance.
+- Update totals when financial records change.
+- Provide a responsive green-and-white dashboard.
+- Display a Savings – Coming Soon card for future development.
+
+**Note:** The Savings card is currently a visual placeholder. Savings tracking will be implemented in Sprint 2.
 
 ---
 
-## 🛠️ Planned Technology Stack
+## 🛠️ Technology Stack
 
 | Component | Technology | Purpose |
 |---|---|---|
-| 🎨 Frontend | HTML, CSS, JavaScript | Build the user interface and interactive features |
-| 🐍 Backend | Python, Flask | Handle application logic and backend functionality |
-| 🗄️ Database | PostgreSQL | Store income, expenses, budgets, and savings data |
-| 🐳 Containerization | Docker, Docker Compose | Support consistent development environments |
-| 🔧 Version Control | Git, GitHub | Track code changes and manage the repository |
-| ⚙️ CI/CD | GitHub Actions | Automate testing and deployment workflows |
-| ☁️ Cloud Deployment | Google Cloud Run | Planned application hosting |
-| 🤖 AI Development Tools | GitHub Copilot, ChatGPT | Assist with development, debugging, and documentation |
+| Frontend | HTML, CSS, Jinja2 | Dashboard, forms, and tables |
+| Backend | Python, Flask | Application logic and routes |
+| Database | PostgreSQL | Store income and expense records |
+| Database Driver | psycopg | Connect Flask to PostgreSQL |
+| Containerization | Docker | Package and run the application |
+| Version Control | Git, GitHub | Branches, commits, and pull requests |
+| Cloud Deployment | Google Cloud Run | Host the application |
+| Cloud Database | Google Cloud SQL | Host PostgreSQL |
+| Project Management | Jira | Track stories, tasks, and sprint progress |
+| Documentation | README, Confluence | Document technical and project work |
+| AI Development Tools | GitHub Copilot, ChatGPT | Development and troubleshooting |
 
 ---
 
-## 🏗️ Planned Application Architecture
+## 🏗️ Application Architecture
 
-The application will use a frontend, backend, and database structure.
+The application follows a frontend, backend, and database structure.
 
-**Frontend (HTML, CSS, JavaScript)**  
-⬇️ Sends requests to the backend
+**Frontend (HTML, CSS, Jinja2)**  
+Displays forms, financial records, and dashboard summaries.
+
+⬇️
 
 **Backend (Python / Flask)**  
-⬇️ Processes requests and communicates with the database
+Processes requests, validates input, performs CRUD operations, and calculates financial totals.
+
+⬇️
 
 **Database (PostgreSQL)**  
-💾 Stores financial information
+Stores income and expense records.
 
-The backend will handle data processing and calculations, while the frontend will display financial information to the user.
+For the cloud deployment, Flask runs on Google Cloud Run and connects to PostgreSQL hosted in Google Cloud SQL.
 
 ---
 
-## 🚀 Development Plan
+## ⚙️ Installation & Local Setup
 
-The project will follow an Agile development approach using Jira for project planning and task management.
+### Prerequisites
+
+- Python 3.13
+- PostgreSQL
+- Git
+- Docker (optional for container testing)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/annalena-project/expense-budget-tracker.git
+cd expense-budget-tracker
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate the virtual environment on Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure PostgreSQL
+
+Create a local PostgreSQL database named:
+
+```text
+expense_budget_tracker
+```
+
+The application requires `income` and `expense` tables to store financial records.
+
+The database must be initialized with the schema used by the Flask application before running it.
+
+### 5. Configure Environment Variables
+
+Create a `.env` file in the project directory.
+
+```dotenv
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=expense_budget_tracker
+DB_USER=postgres
+DB_PASSWORD=your_local_database_password
+```
+
+Replace the placeholder password with your own PostgreSQL password.
+
+**Security:** Never commit `.env` or real database credentials to GitHub.
+
+### 6. Run the Application
+
+```bash
+python app.py
+```
+
+Open the application in your browser:
+
+http://127.0.0.1:5000
+
+---
+
+## 🐳 Docker Containerization
+
+The project includes a `Dockerfile` and `.dockerignore` to support containerized deployment.
+
+Build the Docker image:
+
+```bash
+docker build -t expense-budget-tracker .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 8080:8080 --env-file .env -e DB_HOST=host.docker.internal expense-budget-tracker
+```
+
+Open the application at:
+
+http://localhost:8080
+
+The `host.docker.internal` setting allows the container to connect to PostgreSQL running on the host computer in a supported Docker Desktop environment.
+
+The application has been successfully built and tested using Docker.
+
+---
+
+## ☁️ Google Cloud Deployment
+
+The Sprint 1 MVP is deployed on Google Cloud Run with a PostgreSQL database hosted in Google Cloud SQL.
+
+**Live Application:**
+
+https://expense-budget-tracker-git-666317662633.us-central1.run.app
+
+The cloud deployment has been tested with income and expense records.
+
+The dashboard successfully displays financial totals using data stored in Cloud SQL.
+
+The deployed application currently uses demonstration data.
+
+---
+
+## 🔧 Git & GitHub Workflow
+
+The project uses Git and GitHub to track code changes and follow professional development practices.
+
+Development activities include:
+
+- Creating feature branches for new functionality.
+- Writing descriptive commit messages.
+- Pushing changes to GitHub.
+- Creating and merging pull requests into `main`.
+- Reviewing changes before merging.
+
+Pull Request #6 integrated PostgreSQL, Docker configuration, and the Sprint 1 dashboard into the main branch.
+
+**GitHub Repository:**
+
+https://github.com/annalena-project/expense-budget-tracker
+
+---
+
+## 🚀 Agile Development Plan
+
+The project follows an Agile development approach using Jira for planning and task management.
 
 ### 🟢 Sprint 1 – Minimum Viable Product (MVP)
+
 **Target: End of Unit 12**
 
-The first sprint will focus on the core income and expense management features:
+Completed features:
 
 - Add income entries.
 - Add expense entries.
-- Edit existing entries.
-- Delete existing entries.
-
-The goal is to develop a functional foundation for managing financial transactions.
+- Edit existing financial records.
+- Delete existing financial records.
+- View saved income and expenses.
+- Store financial information in PostgreSQL.
+- Calculate total income, total expenses, and balance.
+- Build a responsive financial dashboard.
+- Containerize the application using Docker.
+- Deploy the application to Google Cloud Run with Cloud SQL.
+- Use Git feature branches, descriptive commits, and pull requests.
 
 ### 🔵 Sprint 2 – Final Application
+
 **Target: End of Unit 14**
 
-The second sprint will expand the application with:
+Planned features:
 
 - Monthly budget planning and comparisons.
+- Fixed and recurring expenses, such as rent, insurance, and subscriptions.
 - Savings goals and contribution tracking.
-- Expense category analysis.
+- Expense analysis by category.
 - Monthly spending trends.
 - Income versus expense charts.
-- Financial summary dashboard.
+- Additional financial analytics.
+- Further improvements to the application and development workflow.
 
-The goal is to complete the planned application features and prepare the final project.
+The goal is to expand the Sprint 1 MVP into a more complete personal finance application.
 
 ---
 
 ## 🤖 AI-Assisted Development
 
-AI tools are planned to support the development process.
+AI tools were used throughout Sprint 1 to support learning, development, debugging, and documentation.
 
-**GitHub Copilot**
-- Assist with code suggestions and development.
-- Support debugging and code improvements.
+### GitHub Copilot
 
-**ChatGPT**
-- Help explain programming concepts.
+GitHub Copilot was used to:
+
+- Assist with Flask and PostgreSQL integration.
+- Support implementation of income and expense management.
+- Help implement financial summary calculations.
+- Create and refine the responsive dashboard design.
+- Assist with debugging and code improvements.
+- Support application testing.
+
+### ChatGPT
+
+ChatGPT was used to:
+
+- Explain programming concepts and development tools.
+- Help plan development steps.
 - Support troubleshooting and problem-solving.
-- Assist with documentation and development planning.
+- Assist with PostgreSQL, Docker, Git, and Google Cloud configuration.
+- Help prepare focused instructions for GitHub Copilot.
+- Support documentation and project organization.
 
-All AI-generated suggestions and code will be reviewed and tested before being included in the application.
+AI-generated suggestions were reviewed and tested during development.
+
+The application was tested locally, using Docker, and after deployment to Google Cloud.
 
 ---
 
-## ⚙️ Installation & Setup
+## 🧪 Testing & Verification
 
-Detailed installation and setup instructions will be added as the application is developed.
+Sprint 1 testing included:
 
-The planned development environment includes Python, Flask, PostgreSQL, and Docker.
-
-This section will be updated with the necessary dependencies, environment configuration, and instructions for running the application locally.
+- Adding income and expense records.
+- Verifying that records are stored in PostgreSQL.
+- Testing edit and delete functionality during development.
+- Checking financial summary calculations.
+- Testing the dashboard layout on desktop and mobile screen sizes.
+- Building and running the Docker container.
+- Verifying that the deployed Google Cloud application connects to Cloud SQL.
+- Confirming that saved financial records appear in the deployed dashboard.
 
 ---
 
 ## 📸 Application Screenshots
 
-Screenshots of the application interface and financial dashboard will be added during development.
+Screenshots of the completed Sprint 1 dashboard and cloud deployment will be added to demonstrate the application.
 
 ---
 
 ## 📚 Project Documentation
 
-Project planning and development documentation will be maintained using:
+Project planning and development documentation is maintained using:
 
-- **Jira:** Epics, user stories, subtasks, acceptance criteria, and sprint planning.
+- **Jira:** Epics, user stories, subtasks, acceptance criteria, and sprint progress.
 - **Confluence:** Project overview, technical decisions, development challenges, and progress documentation.
-- **GitHub:** Source code, version history, and technical documentation.
+- **GitHub:** Source code, commit history, pull requests, and technical documentation.
+
+**Jira Project:**
+
+https://annasch.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog?epics=visible
+
+**Confluence Space:**
+
+https://annasch.atlassian.net/wiki/x/AYAG
 
 ---
 
 ## 📌 Current Project Status
 
-🚧 **Planning and Design Phase**
+✅ **Sprint 1 MVP implemented and deployed**
 
-The initial project requirements, user stories, acceptance criteria, and sprint plans have been prepared.
+The application supports income and expense management with PostgreSQL storage, dynamic balance calculations, and a responsive dashboard.
 
-Application development, testing, and deployment are planned for the upcoming project units.
+The application is deployed to Google Cloud Run and connected to Cloud SQL.
+
+Sprint 2 will focus on expanding the application with monthly budgets, fixed and recurring expenses, savings goals, and financial analytics.
 
 ---
 
 ## 🎓 Academic Project
 
-This application is being developed as a final project for the Modern Technologies course at North Park University, Chicago.
+This application is being developed as a final project for the **Modern Technologies** course at **North Park University, Chicago**.
 
 **Project:** Expense & Budget Tracker  
 **Project Type:** Personal Finance & Analytics Web Application
