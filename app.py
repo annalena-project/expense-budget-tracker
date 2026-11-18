@@ -267,28 +267,33 @@ def add_expense():
     )
 
 
-@app.route("/edit/<entry_type>/<int:index>", methods=["GET", "POST"])
-def edit_entry(entry_type, index):
-    """Show an edit form and save valid changes to an existing entry."""
+@app.route("/edit/<entry_type>/<int:entry_id>", methods=["GET", "POST"])
+def edit_entry(entry_type, entry_id):
+    """Load an income or expense record and save valid edits."""
     if entry_type == "income":
-        entries = income_entries
+        select_sql = "SELECT id, amount, description, date FROM income WHERE id = %s"
+        update_sql = (
+            "UPDATE income SET amount = %s, description = %s, date = %s WHERE id = %s"
+        )
     elif entry_type == "expense":
-        entries = expense_entries
+        select_sql = (
+            "SELECT id, amount, description, date, category FROM expense WHERE id = %s"
+        )
+        update_sql = (
+            "UPDATE expense SET amount = %s, description = %s, date = %s, "
+            "category = %s WHERE id = %s"
+        )
     else:
         abort(404)
 
-    if index >= len(entries):
-        abort(404)
-
-    entry = entries[index]
+    entry = None
     errors = []
+    load_error = None
     confirmation = None
-    form_values = {
-        "amount": str(entry["amount"]),
-        "description": entry["description"],
-        "date": str(entry["date"]),
-        "category": entry.get("category", ""),
-    }
+    form_values = {"amount": "", "description": "", "date": "", "category": ""}
+    loading_entry = True
+    connection = None
+    cursor = None
 
     if request.method == "POST":
         form_values = {
@@ -298,31 +303,106 @@ def edit_entry(entry_type, index):
             "category": request.form.get("category", "").strip(),
         }
 
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute(select_sql, (entry_id,))
+        row = cursor.fetchone()
+        if row is None:
+            abort(404)
+
+        entry = {
+            "id": row[0],
+            "amount": row[1],
+            "description": row[2],
+            "date": row[3],
+        }
+        if entry_type == "expense":
+            entry["category"] = row[4]
+
+        loading_entry = False
+        if request.method == "GET":
+            form_values = {
+                "amount": str(entry["amount"]),
+                "description": entry["description"],
+                "date": str(entry["date"]),
+                "category": entry.get("category", ""),
+            }
+        else:
+            try:
+                amount = Decimal(form_values["amount"])
+                if not amount.is_finite() or amount <= 0:
+                    errors.append(f"Enter an {entry_type} amount greater than zero.")
+            except InvalidOperation:
+                errors.append(f"Enter a valid {entry_type} amount.")
+
+            if not form_values["description"]:
+                errors.append("Enter a description.")
+
+            try:
+                entry_date = datetime.strptime(form_values["date"], "%Y-%m-%d").date()
+            except ValueError:
+                errors.append("Enter a valid date.")
+
+            if entry_type == "expense" and form_values["category"] not in expense_categories:
+                errors.append("Choose a valid expense category.")
+
+            if not errors:
+                if entry_type == "income":
+                    cursor.execute(
+                        update_sql,
+                        (
+                            amount,
+                            form_values["description"],
+                            entry_date,
+                            entry_id,
+                        ),
+                    )
+                else:
+                    cursor.execute(
+                        update_sql,
+                        (
+                            amount,
+                            form_values["description"],
+                            entry_date,
+                            form_values["category"],
+                            entry_id,
+                        ),
+                    )
+
+                if cursor.rowcount == 0:
+                    abort(404)
+
+                connection.commit()
+                entry["amount"] = amount
+                entry["description"] = form_values["description"]
+                entry["date"] = entry_date
+                if entry_type == "expense":
+                    entry["category"] = form_values["category"]
+                confirmation = f"{entry_type.title()} entry updated successfully."
+    except psycopg.Error:
+        app.logger.exception("Database error while editing %s entry %s.", entry_type, entry_id)
+        if connection is not None:
+            try:
+                connection.rollback()
+            except psycopg.Error:
+                app.logger.exception("Database error while rolling back edit.")
+        if loading_entry:
+            load_error = "Could not load this entry for editing. Please try again."
+        else:
+            errors.append("Could not save changes. Please try again.")
+    finally:
         try:
-            amount = Decimal(form_values["amount"])
-            if not amount.is_finite() or amount <= 0:
-                errors.append(f"Enter an {entry_type} amount greater than zero.")
-        except InvalidOperation:
-            errors.append(f"Enter a valid {entry_type} amount.")
-
-        if not form_values["description"]:
-            errors.append("Enter a description.")
-
-        try:
-            entry_date = datetime.strptime(form_values["date"], "%Y-%m-%d").date()
-        except ValueError:
-            errors.append("Enter a valid date.")
-
-        if entry_type == "expense" and form_values["category"] not in expense_categories:
-            errors.append("Choose a valid expense category.")
-
-        if not errors:
-            entry["amount"] = amount
-            entry["description"] = form_values["description"]
-            entry["date"] = entry_date
-            if entry_type == "expense":
-                entry["category"] = form_values["category"]
-            confirmation = f"{entry_type.title()} entry updated successfully."
+            if cursor is not None:
+                cursor.close()
+        except psycopg.Error:
+            app.logger.exception("Database error while closing edit cursor.")
+        finally:
+            if connection is not None:
+                try:
+                    connection.close()
+                except psycopg.Error:
+                    app.logger.exception("Database error while closing edit connection.")
 
     income_entries, income_load_error, expense_entries, expense_load_error = load_entries()
 
@@ -341,8 +421,9 @@ def edit_entry(entry_type, index):
         expense_categories=expense_categories,
         edit_entry=entry,
         edit_type=entry_type,
-        edit_index=index,
+        edit_entry_id=entry_id,
         edit_errors=errors,
+        edit_load_error=load_error,
         edit_confirmation=confirmation,
         edit_form_values=form_values,
     )
