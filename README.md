@@ -320,7 +320,9 @@ Sprint 1 testing included:
 
 ## 📸 Application Screenshots
 
-Screenshots of the completed Sprint 1 dashboard and cloud deployment will be added to demonstrate the application.
+### Sprint 1 MVP Dashboard
+
+![Expense & Budget Tracker Dashboard](screenshots/dashboard.png)
 
 ---
 
