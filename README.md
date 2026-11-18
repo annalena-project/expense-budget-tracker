@@ -271,35 +271,41 @@ The goal is to expand the Sprint 1 MVP into a more complete personal finance app
 
 ---
 
-## 🤖 AI-Assisted Development
+### 🤖 Example of AI-Assisted Code
 
-AI tools were used throughout Sprint 1 to support learning, development, debugging, and documentation.
+GitHub Copilot helped implement the financial summary calculations in `app.py`. This feature calculates the user's income, expenses, and remaining balance.
 
-### GitHub Copilot
+**Code example from Sprint 1:**
 
-GitHub Copilot was used to:
+```python
+total_income = sum(
+    (Decimal(str(entry["amount"])) for entry in income_entries),
+    Decimal("0.00"),
+)
 
-- Assist with Flask and PostgreSQL integration.
-- Support implementation of income and expense management.
-- Help implement financial summary calculations.
-- Create and refine the responsive dashboard design.
-- Assist with debugging and code improvements.
-- Support application testing.
+total_expenses = sum(
+    (Decimal(str(entry["amount"])) for entry in expense_entries),
+    Decimal("0.00"),
+)
 
-### ChatGPT
+balance = total_income - total_expenses
+```
 
-ChatGPT was used to:
+**Example calculation:**
 
-- Explain programming concepts and development tools.
-- Help plan development steps.
-- Support troubleshooting and problem-solving.
-- Assist with PostgreSQL, Docker, Git, and Google Cloud configuration.
-- Help prepare focused instructions for GitHub Copilot.
-- Support documentation and project organization.
+| Financial Summary | Amount |
+|---|---:|
+| 🪙 Total Income | $1,500.00 |
+| 💸 Total Expenses | $50.00 |
+| 💰 Remaining Balance | $1,450.00 |
 
-AI-generated suggestions were reviewed and tested during development.
+**How it works**
 
-The application was tested locally, using Docker, and after deployment to Google Cloud.
+The application retrieves income and expense records from PostgreSQL, calculates the totals, and displays the results on the dashboard.
+
+**AI Usage & Verification**
+
+GitHub Copilot assisted with the implementation. The calculations were reviewed and tested with sample income and expense records.
 
 ---
 
