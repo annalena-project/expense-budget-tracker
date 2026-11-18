@@ -1,0 +1,19 @@
+# Exclude secrets, Git metadata, and generated files.
+.env
+.env.*
+.git
+.git/**
+__pycache__/
+**/__pycache__/
+*.pyc
+**/*.pyc
+.venv/
+venv/
+
+# Include only the files copied into the image.
+**
+!requirements.txt
+!app.py
+!db.py
+!templates/
+!templates/**
